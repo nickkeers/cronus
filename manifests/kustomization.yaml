@@ -7,3 +7,4 @@ resources:
 - role.yaml
 - serviceaccount.yaml
 - rolebinding.yaml
+- cronjob.yaml
