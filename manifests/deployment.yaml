@@ -1,0 +1,21 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cronus
+  namespace: cronus
+spec:
+  selector:
+    matchLabels:
+      app: cronus
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cronus
+    spec:
+      containers:
+      - name: cronus
+        image: cronus:local
+        ports:
+        - containerPort: 8080
