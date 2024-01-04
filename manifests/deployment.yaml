@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
       - name: cronus
-        image: cronus:local
+        image: nickkeers/cronus:local
         ports:
         - containerPort: 8080
+          name: http
