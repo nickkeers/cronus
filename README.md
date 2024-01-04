@@ -21,3 +21,7 @@ Pre-requisites:
 1. `kubectl config use-context docker-desktop`
 1. `kubectl apply -k manifests`
 1. [`http://localhost:8080`](http://localhost:8080) is available.
+
+Reload the image with:
+
+`docker build -t nickkeers/cronus:local && kubectl rollout -n cronus deployment/cronus`
