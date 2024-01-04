@@ -1,17 +1,20 @@
 package api
 
 import (
+	"cronus/internal/cronus"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type CronusAPI struct {
-	router *gin.Engine
+	router      *gin.Engine
+	cronManager *cronus.CronJobManager
 }
 
-func NewCronusAPI() *CronusAPI {
+func NewCronusAPI(manager *cronus.CronJobManager) *CronusAPI {
 	api := &CronusAPI{
-		router: gin.Default(),
+		router:      gin.Default(),
+		cronManager: manager,
 	}
 
 	api.setupRoutes()
@@ -29,11 +32,7 @@ func (c *CronusAPI) setupRoutes() {
 		})
 	})
 
-	c.router.GET("/api/cronjobs", func(context *gin.Context) {
-		context.JSON(200, map[string]string{
-			"hello": "world",
-		})
-	})
+	c.router.GET("/api/cronjobs", ListCronjobsHandler(c.cronManager))
 }
 
 func (c *CronusAPI) Run(addr string) error {

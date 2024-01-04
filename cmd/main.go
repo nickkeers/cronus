@@ -1,9 +1,18 @@
 package main
 
-import "cronus/internal/api"
+import (
+	"cronus/internal/api"
+	"cronus/internal/cronus"
+)
 
 func main() {
-	apiRouter := api.NewCronusAPI()
+	manager, err := cronus.NewCronJobManager()
+
+	if err != nil {
+		panic(err)
+	}
+
+	apiRouter := api.NewCronusAPI(manager)
 
 	if err := apiRouter.Run(":8080"); err != nil {
 		// just temporary, I promise

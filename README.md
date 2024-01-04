@@ -24,4 +24,4 @@ Pre-requisites:
 
 Reload the image with:
 
-`docker build -t nickkeers/cronus:local && kubectl rollout -n cronus deployment/cronus`
+`docker build -t nickkeers/cronus:local . && kubectl rollout -n cronus deployment/cronus`
