@@ -17,7 +17,7 @@ Pre-requisites:
 - Install Docker
 - Docker desktop Kubernetes integration enabled
 
-1. `docker build -t nickkeers/cronus:local`
+1. `docker build -t nickkeers/cronus:local .`
 1. `kubectl config use-context docker-desktop`
 1. `kubectl apply -k manifests`
 1. [`http://localhost:8080`](http://localhost:8080) is available.
