@@ -14,7 +14,7 @@ spec:
       labels:
         app: cronus
     spec:
-      serviceAccountName: cronus-account
+      serviceAccountName: cronus
       containers:
       - name: cronus
         image: nickkeers/cronus:local
