@@ -1,0 +1,23 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+  namespace: cronus
+spec:
+  selector:
+    matchLabels:
+      app: test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      serviceAccountName: cronus
+      containers:
+      - name: test
+        image: bitnami/kubectl:latest
+        imagePullPolicy: IfNotPresent
+        command: [ "/bin/sh", "-c", "--" ]
+        args: [ "while true; do sleep 300; done;" ]

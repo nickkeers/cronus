@@ -2,11 +2,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: read-cronjobs
-  namespace: default
 subjects:
   - kind: ServiceAccount
-    name: cronus-service-account
-    namespace: default
+    name: cronus
+    namespace: cronus
 roleRef:
   kind: ClusterRole
   name: cronjob-reader
