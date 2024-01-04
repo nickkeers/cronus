@@ -1,0 +1,9 @@
+{{template "base"}}
+
+{{define "title"}}Index{{end}}
+
+{{define "main"}}
+    <h1>Home</h1>
+    <div hx-get="/api/cronjobs" hx-trigger="load">Get Data</div>
+{{end}}
+
