@@ -1,0 +1,32 @@
+{{ define "table" }}
+<table class="table table-striped">
+    <thead>
+    <tr class="text-center">
+        <th scope="col">Name</th>
+        <th scope="col">Namespace</th>
+        <th scope="col">Schedule</th>
+        <th scope="col">Last Scheduled Time</th>
+        <th scope="col">Last Successful Time</th>
+        <th scope="col">Next Run Time</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody class="table-group-divider">
+    {{ range . }}
+        {{- /*gotype: cronus/internal/cronus.CronJobInfo*/ -}}
+        <tr class="text-center">
+            <th scope="row">{{.Name}}</th>
+            <td>{{.Namespace}}</td>
+            <td>{{.CronScheduleRaw}}</td>
+            <td>{{.LastScheduledTime | readableDateTime}}</td>
+            <td>{{.LastSuccessfulTime | readableDateTime}}</td>
+            <td>{{.NextRunTime | readableDateTime}}</td>
+            <td>
+                <button class="btn btn-primary" disabled>Run Job</button>
+                <button class="btn btn-primary" hx-get="/api/logs/{{.Namespace}}/{{.Name}}" hx-target="#logs">Fetch logs</button>
+            </td>
+        </tr>
+    {{ end }}
+    </tbody>
+</table>
+{{ end }}

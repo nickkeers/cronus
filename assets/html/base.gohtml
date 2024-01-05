@@ -12,9 +12,11 @@
     <script src="/assets/js/htmx.min.js"></script>
 </head>
 <body>
-    <main>
-        {{ template "main" }}
-    </main>
+    <div class="container">
+        <main>
+            {{ template "main" . }}
+        </main>
+    </div>
 </body>
 </html>
 {{ end }}

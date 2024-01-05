@@ -909,7 +909,7 @@
   const NAME$e = 'button';
   const DATA_KEY$9 = 'bs.button';
   const EVENT_KEY$a = `.${DATA_KEY$9}`;
-  const DATA_API_KEY$6 = '.data-api';
+  const DATA_API_KEY$6 = '.data-routes';
   const CLASS_NAME_ACTIVE$3 = 'active';
   const SELECTOR_DATA_TOGGLE$5 = '[data-bs-toggle="button"]';
   const EVENT_CLICK_DATA_API$6 = `click${EVENT_KEY$a}${DATA_API_KEY$6}`;
@@ -1093,7 +1093,7 @@
   const NAME$c = 'carousel';
   const DATA_KEY$8 = 'bs.carousel';
   const EVENT_KEY$8 = `.${DATA_KEY$8}`;
-  const DATA_API_KEY$5 = '.data-api';
+  const DATA_API_KEY$5 = '.data-routes';
   const ARROW_LEFT_KEY$1 = 'ArrowLeft';
   const ARROW_RIGHT_KEY$1 = 'ArrowRight';
   const TOUCHEVENT_COMPAT_WAIT = 500; // Time for mouse compat events to fire after touch
@@ -1466,7 +1466,7 @@
   const NAME$b = 'collapse';
   const DATA_KEY$7 = 'bs.collapse';
   const EVENT_KEY$7 = `.${DATA_KEY$7}`;
-  const DATA_API_KEY$4 = '.data-api';
+  const DATA_API_KEY$4 = '.data-routes';
   const EVENT_SHOW$6 = `show${EVENT_KEY$7}`;
   const EVENT_SHOWN$6 = `shown${EVENT_KEY$7}`;
   const EVENT_HIDE$6 = `hide${EVENT_KEY$7}`;
@@ -3539,7 +3539,7 @@
   const NAME$a = 'dropdown';
   const DATA_KEY$6 = 'bs.dropdown';
   const EVENT_KEY$6 = `.${DATA_KEY$6}`;
-  const DATA_API_KEY$3 = '.data-api';
+  const DATA_API_KEY$3 = '.data-routes';
   const ESCAPE_KEY$2 = 'Escape';
   const TAB_KEY$1 = 'Tab';
   const ARROW_UP_KEY$1 = 'ArrowUp';
@@ -4229,7 +4229,7 @@
   const NAME$7 = 'modal';
   const DATA_KEY$4 = 'bs.modal';
   const EVENT_KEY$4 = `.${DATA_KEY$4}`;
-  const DATA_API_KEY$2 = '.data-api';
+  const DATA_API_KEY$2 = '.data-routes';
   const ESCAPE_KEY$1 = 'Escape';
   const EVENT_HIDE$4 = `hide${EVENT_KEY$4}`;
   const EVENT_HIDE_PREVENTED$1 = `hidePrevented${EVENT_KEY$4}`;
@@ -4534,7 +4534,7 @@
   const NAME$6 = 'offcanvas';
   const DATA_KEY$3 = 'bs.offcanvas';
   const EVENT_KEY$3 = `.${DATA_KEY$3}`;
-  const DATA_API_KEY$1 = '.data-api';
+  const DATA_API_KEY$1 = '.data-routes';
   const EVENT_LOAD_DATA_API$2 = `load${EVENT_KEY$3}${DATA_API_KEY$1}`;
   const ESCAPE_KEY = 'Escape';
   const CLASS_NAME_SHOW$3 = 'show';
@@ -5587,7 +5587,7 @@
   const NAME$2 = 'scrollspy';
   const DATA_KEY$2 = 'bs.scrollspy';
   const EVENT_KEY$2 = `.${DATA_KEY$2}`;
-  const DATA_API_KEY = '.data-api';
+  const DATA_API_KEY = '.data-routes';
   const EVENT_ACTIVATE = `activate${EVENT_KEY$2}`;
   const EVENT_CLICK = `click${EVENT_KEY$2}`;
   const EVENT_LOAD_DATA_API$1 = `load${EVENT_KEY$2}${DATA_API_KEY}`;
