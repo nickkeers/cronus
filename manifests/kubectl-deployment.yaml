@@ -2,23 +2,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cronus
+  name: test
   namespace: cronus
 spec:
   selector:
     matchLabels:
-      app: cronus
+      app: test
   replicas: 1
   template:
     metadata:
       labels:
-        app: cronus
+        app: test
     spec:
       serviceAccountName: cronus
       containers:
-      - name: cronus
-        image: nickkeers/cronus:local
+      - name: test
+        image: bitnami/kubectl:latest
         imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-          name: http
+        command: [ "/bin/sh", "-c", "--" ]
+        args: [ "while true; do sleep 300; done;" ]

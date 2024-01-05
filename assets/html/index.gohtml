@@ -4,6 +4,8 @@
 
 {{define "main"}}
     <h1>Home</h1>
-    <div hx-get="/api/cronjobs" hx-trigger="load">Get Data</div>
+    <div hx-get="/api/cronjobs" hx-trigger="load" hx-target="#details">Get Data</div>
+
+    <pre id="details"></pre>
 {{end}}
 
