@@ -1,11 +1,17 @@
-{{template "base"}}
+{{template "base" .}}
 
 {{define "title"}}Index{{end}}
 
 {{define "main"}}
-    <h1>Home</h1>
-    <div hx-get="/api/cronjobs" hx-trigger="load" hx-target="#details">Get Data</div>
+    <h1>Jobs</h1>
 
-    <pre id="details"></pre>
+    {{ if .error }}
+        <p>{{.error}}</p>
+    {{- else }}
+        {{template "table" .Jobs}}
+        <pre id="logs">
+
+        </pre>
+    {{end}}
 {{end}}
 
