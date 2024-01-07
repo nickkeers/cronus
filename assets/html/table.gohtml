@@ -23,7 +23,13 @@
             <td>{{.NextRunTime | readableDateTime}}</td>
             <td>
                 <button class="btn btn-primary" disabled>Run Job</button>
-                <button class="btn btn-primary" hx-get="/api/logs/{{.Namespace}}/{{.Name}}" hx-target="#logs">Fetch logs</button>
+                <button
+                        class="btn btn-primary"
+                        hx-get="/api/logs/{{.Namespace}}/{{.Name}}/html"
+                        hx-trigger="click"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modals-here"
+                        hx-target="#modals-here">Fetch logs</button>
             </td>
         </tr>
     {{ end }}

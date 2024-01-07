@@ -53,7 +53,7 @@ func (c *CronusAPI) setupRoutes() {
 	})
 
 	c.router.GET("/api/cronjobs", ListCronjobsHandler(c.cronManager))
-	c.router.GET("/api/logs/:namespace/:name", GetPodLogs(c.cronManager))
+	c.router.GET("/api/logs/:namespace/:name/:type", GetPodLogs(c.cronManager))
 }
 
 func (c *CronusAPI) Run(addr string) error {

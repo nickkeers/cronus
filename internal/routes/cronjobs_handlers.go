@@ -40,21 +40,41 @@ func GetPodLogs(manager *cronus.CronJobManager) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		name := context.Param("name")
 		namespace := context.Param("namespace")
+		contentType := context.Param("type")
+
+		if contentType == "" {
+			contentType = "json"
+		}
 
 		fmt.Printf("Fetch logs for %s/%s\n", namespace, name)
 
 		logs, err := manager.GetPodLogs(name, namespace)
 
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to fetch logs",
-				"msg":   err.Error(),
+		switch contentType {
+		case "text":
+			if err != nil {
+				context.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Failed to fetch logs",
+					"msg":   err.Error(),
+				})
+				return
+			}
+			logMsg := podLogsToSingleString(logs)
+
+			context.String(http.StatusOK, logMsg)
+			return
+		case "html":
+			context.HTML(http.StatusOK, "logsmodal", gin.H{
+				"Title": fmt.Sprintf("Logs for job %s/%s", namespace, name),
+				"Body":  podLogsToSingleString(logs),
+			})
+			return
+		default:
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid content type",
+				"msg":   "Last parameter must be text or html",
 			})
 			return
 		}
-
-		logMsg := podLogsToSingleString(logs)
-
-		context.String(http.StatusOK, logMsg)
 	}
 }
