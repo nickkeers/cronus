@@ -1,5 +1,8 @@
 {
-    "target": "deploy/cronus",
+    "target": {
+        "path": "deploy/cronus",
+        "namespace": "cronus"
+    },
     "feature": {
         "env": true,
         "fs": "read",
