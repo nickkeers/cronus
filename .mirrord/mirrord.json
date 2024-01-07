@@ -1,0 +1,13 @@
+{
+    "target": {
+        "path": "deploy/cronus",
+        "namespace": "cronus"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read",
+        "network": {
+            "incoming": "steal"
+        }
+    }
+}
