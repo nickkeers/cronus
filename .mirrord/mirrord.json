@@ -1,0 +1,10 @@
+{
+    "target": "deploy/cronus",
+    "feature": {
+        "env": true,
+        "fs": "read",
+        "network": {
+            "incoming": "steal"
+        }
+    }
+}
