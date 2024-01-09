@@ -1,0 +1,28 @@
+{{define "jobs_table"}}
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Job Name</th>
+                <th>Namespace</th>
+                <th>Start time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range . }}
+                {{- /*gotype: cronus/internal/cronus.JobInfo*/ -}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.Namespace}}</td>
+                    <td>{{.StartTime | readableDateTime}}</td>
+                </tr>
+                {{ if .Pods }}
+                    <tr>
+                        <td colspan="3">
+                            {{ template "pods_table" .Pods }}
+                        </td>
+                    </tr>
+                {{ end }}
+            {{ end }}
+        </tbody>
+    </table>
+{{end}}

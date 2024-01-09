@@ -8,7 +8,7 @@
     {{ if .error }}
         <p>{{.error}}</p>
     {{- else }}
-        {{template "table" .Jobs}}
+        {{template "table" .CronJobInfo}}
     {{end}}
 {{end}}
 

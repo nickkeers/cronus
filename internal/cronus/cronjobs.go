@@ -4,8 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/gorhill/cronexpr"
 	"io"
+	"reflect"
+	"strings"
+	"time"
+
+	"github.com/gorhill/cronexpr"
 	v1 "k8s.io/api/batch/v1"
 	v12 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,13 +19,19 @@ import (
 	batch "k8s.io/client-go/listers/batch/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
-	"reflect"
-	"time"
 )
 
 type CronJobManager struct {
 	clientset *kubernetes.Clientset
 	lister    batch.CronJobLister
+}
+
+type PodDetails struct {
+	Name      string
+	Namespace string
+	Image     string
+	Command   string
+	StartTime *metav1.Time
 }
 
 type CronJobInfo struct {
@@ -33,6 +43,14 @@ type CronJobInfo struct {
 	LastSuccessfulTime time.Time
 
 	NextRunTime time.Time
+	Jobs        *[]JobInfo
+}
+
+type JobInfo struct {
+	Name      string
+	Namespace string
+	StartTime time.Time
+	Pods      *[]PodDetails
 }
 
 func NewCronJobManager(stopCh <-chan struct{}) (*CronJobManager, error) {
@@ -107,44 +125,36 @@ func (c *CronJobManager) ListCronJobs() (*[]CronJobInfo, error) {
 	return &cronJobInfos, nil
 }
 
-type PodDetails struct {
-	Name      string
-	Namespace string
-}
-
-// GetPods retrieves Pods for each Job associated with the provided CronJobs.
-func (c *CronJobManager) GetPods(cronJobs []CronJobInfo) (map[string][]PodDetails, error) {
+// GetPods retrieves Pods for each Job
+func (c *CronJobManager) GetPods(jobs []JobInfo) (map[string][]PodDetails, error) {
 	podsMap := make(map[string][]PodDetails)
 	var errorsList []error
 
-	for _, cronJob := range cronJobs {
-		// First, get the Jobs for the CronJob
-		jobs, err := c.GetJobsForCronJob(cronJob.Name, cronJob.Namespace)
+	for _, job := range jobs {
+		// List all Pods in the namespace
+		allPods, err := c.clientset.CoreV1().Pods(job.Namespace).List(context.Background(), metav1.ListOptions{})
 		if err != nil {
 			errorsList = append(errorsList, err)
 			continue
 		}
 
-		for _, jobName := range jobs {
-			// For each Job, list the Pods
-			podList, err := c.clientset.CoreV1().Pods(cronJob.Namespace).List(context.Background(), metav1.ListOptions{
-				LabelSelector: fmt.Sprintf("job-name=%s", jobName),
-			})
-			if err != nil {
-				errorsList = append(errorsList, err)
-				continue
+		var pods []PodDetails
+		for _, pod := range allPods.Items {
+			// Check if the Pod's owner is the current Job
+			for _, ref := range pod.OwnerReferences {
+				if ref.Kind == "Job" && ref.Name == job.Name {
+					pods = append(pods, PodDetails{
+						Name:      pod.Name,
+						Namespace: pod.Namespace,
+						Image:     pod.Spec.Containers[0].Image,
+						Command:   strings.Join(pod.Spec.Containers[0].Command, "\n"),
+						StartTime: pod.Status.StartTime,
+					})
+					break
+				}
 			}
-
-			var pods []PodDetails
-			for _, pod := range podList.Items {
-				pods = append(pods, PodDetails{
-					Name:      pod.Name,
-					Namespace: pod.Namespace,
-				})
-			}
-
-			podsMap[jobName] = pods
 		}
+		podsMap[job.Name] = pods
 	}
 
 	if len(errorsList) > 0 {
@@ -156,32 +166,41 @@ func (c *CronJobManager) GetPods(cronJobs []CronJobInfo) (map[string][]PodDetail
 }
 
 // GetJobsForCronJob lists the names of Jobs that were created by a specific CronJob.
-func (c *CronJobManager) GetJobsForCronJob(cronJobName, namespace string) ([]string, error) {
+func (c *CronJobManager) GetJobsForCronJob(cronJobName, namespace string) ([]JobInfo, error) {
 	// List all Jobs in the namespace
 	jobs, err := c.clientset.BatchV1().Jobs(namespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	var jobNames []string
+	var jobInfo []JobInfo
 	for _, job := range jobs.Items {
 		// Check if the CronJob is the owner of this Job
 		for _, ref := range job.OwnerReferences {
 			if ref.Kind == "CronJob" && ref.Name == cronJobName {
-				jobNames = append(jobNames, job.Name)
+				jobInfo = append(jobInfo, JobInfo{
+					Name:      job.Name,
+					Namespace: job.Namespace,
+					StartTime: job.Status.StartTime.Time,
+				})
 				break
 			}
 		}
 	}
 
-	return jobNames, nil
+	return jobInfo, nil
 }
 
 // GetPodLogs fetches logs for all Pods associated with a given CronJob.
 func (c *CronJobManager) GetPodLogs(cronJobName, namespace string) (map[string]string, error) {
-	// First, get all the Pods for the CronJob
-	cronJobInfo := []CronJobInfo{{Name: cronJobName, Namespace: namespace}}
-	podsMap, err := c.GetPods(cronJobInfo)
+	jobs, err := c.GetJobsForCronJob(cronJobName, namespace)
+
+	if err != nil {
+		fmt.Printf("Error fetching pod logs for %s/%s\n", cronJobName, namespace)
+		return map[string]string{}, err
+	}
+
+	podsMap, err := c.GetPods(jobs)
 	if err != nil {
 		return nil, fmt.Errorf("error getting pods for cron job %s: %v", cronJobName, err)
 	}
@@ -189,7 +208,7 @@ func (c *CronJobManager) GetPodLogs(cronJobName, namespace string) (map[string]s
 	logsMap := make(map[string]string)
 	for jobName, pods := range podsMap {
 		for _, pod := range pods {
-			logContent, err := c.fetchPodLog(pod.Name, namespace)
+			logContent, err := c.FetchPodLog(pod.Name, namespace)
 			if err != nil {
 				fmt.Printf("Error fetching logs for pod %s: %v\n", pod.Name, err)
 				continue
@@ -201,8 +220,8 @@ func (c *CronJobManager) GetPodLogs(cronJobName, namespace string) (map[string]s
 	return logsMap, nil
 }
 
-// fetchPodLog is a helper function to get logs for a single Pod.
-func (c *CronJobManager) fetchPodLog(podName, namespace string) (*string, error) {
+// FetchPodLog is a helper function to get logs for a single Pod.
+func (c *CronJobManager) FetchPodLog(podName, namespace string) (*string, error) {
 	req := c.clientset.CoreV1().Pods(namespace).GetLogs(podName, &v12.PodLogOptions{})
 	podLogs, err := req.Stream(context.Background())
 	if err != nil {
@@ -218,4 +237,47 @@ func (c *CronJobManager) fetchPodLog(podName, namespace string) (*string, error)
 	str := buf.String()
 
 	return &str, nil
+}
+
+// CronJobFullInfo includes information about the CronJob, its child jobs, and pods in each job
+type CronJobFullInfo struct {
+	CronJobInformation *CronJobInfo
+	Jobs               []JobInfo
+}
+
+func (c *CronJobManager) GetCronJobAndPods() (*[]CronJobInfo, error) {
+	cronJobs, err := c.ListCronJobs()
+	if err != nil || cronJobs == nil {
+		fmt.Printf("no cronJobs found in GetCronJobAndPods: %s\n", err.Error())
+		return nil, err
+	}
+
+	for i, cronJob := range *cronJobs {
+		jobs, err := c.GetJobsForCronJob(cronJob.Name, cronJob.Namespace)
+
+		if err != nil {
+			fmt.Printf("No jobs found for %s/%s", cronJob.Namespace, cronJob.Name)
+			return nil, err
+		}
+
+		podsList, err := c.GetPods(jobs)
+		if err != nil {
+			fmt.Printf("no pods found in GetCronJobAndPods: %s\n", err.Error())
+			return nil, err
+		}
+
+		for j, job := range jobs {
+			fmt.Printf("found pods: %+v\n", podsList)
+			for jobName, pods := range podsList {
+				if jobName == job.Name {
+					fmt.Printf("Set pods for job '%s' to '%v'\n", jobName, pods)
+					jobs[j].Pods = &pods
+				}
+			}
+		}
+
+		(*cronJobs)[i].Jobs = &jobs
+	}
+
+	return cronJobs, nil
 }

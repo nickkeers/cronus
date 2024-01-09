@@ -9,5 +9,6 @@
         "network": {
             "incoming": "steal"
         }
-    }
+    },
+    "telemetry": false
 }

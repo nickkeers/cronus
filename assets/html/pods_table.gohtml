@@ -1,0 +1,25 @@
+{{define "pods_table"}}
+    <table class="table table-striped">
+        <thead class="table-dark">
+        <tr>
+            <th>Pod Name</th>
+            <th>Namespace</th>
+            <th>Image</th>
+            <th>Command</th>
+            <th>Start time</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range . }}
+            {{- /*gotype: cronus/internal/cronus.PodDetails*/ -}}
+            <tr>
+                <td>{{.Name}}</td>
+                <td>{{.Namespace}}</td>
+                <td>{{.Image}}</td>
+                <td>{{.Command}}</td>
+                <td>{{.StartTime | readableDateTime}}</td>
+            </tr>
+        {{ end }}
+        </tbody>
+    </table>
+{{end}}

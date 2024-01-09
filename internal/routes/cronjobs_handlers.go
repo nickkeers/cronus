@@ -9,7 +9,7 @@ import (
 
 func ListCronjobsHandler(manager *cronus.CronJobManager) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		jobs, err := manager.ListCronJobs()
+		jobs, err := manager.GetCronJobAndPods()
 
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{
@@ -36,7 +36,23 @@ func podLogsToSingleString(podLogs map[string]string) string {
 	return buf
 }
 
-func GetPodLogs(manager *cronus.CronJobManager) gin.HandlerFunc {
+func GetLogsForSinglePod(manager *cronus.CronJobManager) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		namespace := context.Param("namespace")
+		pod := context.Param("pod")
+
+		log, err := manager.FetchPodLog(pod, namespace)
+
+		if err != nil {
+			context.String(http.StatusInternalServerError, "Error: Failed to fetch logs for pod")
+			return
+		}
+
+		context.String(http.StatusOK, *log)
+	}
+}
+
+func GetLogsForAllPods(manager *cronus.CronJobManager) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		name := context.Param("name")
 		namespace := context.Param("namespace")
