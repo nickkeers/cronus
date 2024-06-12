@@ -29,8 +29,27 @@ func NewCronusAPI(manager *cronus.CronJobManager) *CronusAPI {
 	return api
 }
 
+// readableDateTime is modified to convert absolute times to relative formats.
 func readableDateTime(t time.Time) string {
-	return t.Format("2006-01-02 15:04:05")
+	now := time.Now()
+	diff := now.Sub(t)
+
+	switch {
+	case diff < time.Minute:
+		return "just now"
+	case diff < time.Hour:
+		return fmt.Sprintf("%d minutes ago", diff/time.Minute)
+	case diff < 24*time.Hour:
+		return fmt.Sprintf("%d hours ago", diff/time.Hour)
+	case diff < 7*24*time.Hour:
+		return fmt.Sprintf("%d days ago", diff/(24*time.Hour))
+	case diff < 30*24*time.Hour:
+		return fmt.Sprintf("%d weeks ago", diff/(7*24*time.Hour))
+	case diff < 365*24*time.Hour:
+		return fmt.Sprintf("%d months ago", diff/(30*24*time.Hour))
+	default:
+		return fmt.Sprintf("%d years ago", diff/(365*24*time.Hour))
+	}
 }
 
 func (c *CronusAPI) setupRoutes() {
